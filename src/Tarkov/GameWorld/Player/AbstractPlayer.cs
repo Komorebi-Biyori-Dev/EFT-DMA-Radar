@@ -213,6 +213,12 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         public UnityTransform SkeletonRoot { get; protected set; }
 
         /// <summary>
+        /// Dictionary of Player Bones.
+        /// </summary>
+        public ConcurrentDictionary<Bones, UnityTransform> PlayerBones { get; } = new();
+        protected int _verticesCount;
+
+        /// <summary>
         /// TRUE if critical memory reads (position/rotation) have failed.
         /// </summary>
         public bool IsError { get; set; }
@@ -469,7 +475,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         public virtual void OnRealtimeLoop(VmmScatter scatter)
         {
             scatter.PrepareReadValue<Vector2>(RotationAddress); // Rotation
-            scatter.PrepareReadArray<TrsX>(SkeletonRoot.VerticesAddr, SkeletonRoot.Count); // ESP Vertices
+            scatter.PrepareReadArray<TrsX>(SkeletonRoot.VerticesAddr, _verticesCount > 0 ? _verticesCount : SkeletonRoot.Count); // ESP Vertices
 
             scatter.Completed += (sender, s) =>
             {
@@ -478,7 +484,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                 if (s.ReadValue<Vector2>(RotationAddress, out var rotation))
                     successRot = SetRotation(rotation);
 
-                if (s.ReadArray<TrsX>(SkeletonRoot.VerticesAddr, SkeletonRoot.Count) is PooledMemory<TrsX> vertices)
+                if (s.ReadArray<TrsX>(SkeletonRoot.VerticesAddr, _verticesCount > 0 ? _verticesCount : SkeletonRoot.Count) is PooledMemory<TrsX> vertices)
                 {
                     using (vertices)
                     {
@@ -487,6 +493,10 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                             try
                             {
                                 _ = SkeletonRoot.UpdatePosition(vertices.Span);
+                                foreach (var bone in PlayerBones.Values)
+                                {
+                                    bone.UpdatePosition(vertices.Span);
+                                }
                             }
                             catch (Exception ex) // Attempt to re-allocate Transform on error
                             {
@@ -1007,6 +1017,23 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                 }
                 return dir;
             }
+        }
+
+        /// <summary>
+        /// Get Bone Position (if available).
+        /// </summary>
+        /// <param name="bone">Bone Index.</param>
+        /// <returns>World Position of Bone.</returns>
+        public Vector3 GetBonePos(Bones bone)
+        {
+            try
+            {
+                if (PlayerBones.TryGetValue(bone, out var boneTransform))
+                    return boneTransform.Position;
+            }
+            catch { }
+
+            return Vector3.Zero;
         }
 
         #endregion

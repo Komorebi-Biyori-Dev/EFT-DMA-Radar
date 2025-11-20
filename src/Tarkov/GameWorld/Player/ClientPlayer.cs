@@ -90,6 +90,108 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
             var ti = Memory.ReadPtrChain(this, false, _transformInternalChain);
             SkeletonRoot = new UnityTransform(ti);
             _ = SkeletonRoot.UpdatePosition();
+            SetupBones();
+        }
+
+        public int GetPoseLevel()
+        {
+             return Memory.ReadValue<int>(MovementContext + 0xD0); // 0xD0 = PoseLevel in MovementContext
+        }
+
+        public float GetFov()
+        {
+            try
+            {
+                var hands = Memory.ReadPtr(Base + Offsets.Player.HandsController);
+                if (hands == 0) return 0f;
+                
+                var anim = Memory.ReadPtr(hands + Offsets.FirearmController.WeaponAnimation);
+                if (anim == 0) return 0f;
+
+                return Memory.ReadValue<float>(anim + Offsets.ProceduralWeaponAnimation._fieldOfView);
+            }
+            catch { return 0f; }
+        }
+
+        public bool IsAiming
+        {
+            get
+            {
+                try
+                {
+                    var hands = Memory.ReadPtr(Base + Offsets.Player.HandsController);
+                    if (hands == 0) return false;
+                    
+                    // We assume it's a FirearmController if it has a valid WeaponAnimation pointer at this offset
+                    // Note: Non-firearm controllers might not have WeaponAnimation at this offset, check class or assume 0
+                    var anim = Memory.ReadPtr(hands + Offsets.FirearmController.WeaponAnimation);
+                    if (anim == 0) return false;
+
+                    return Memory.ReadValue<bool>(anim + Offsets.ProceduralWeaponAnimation.IsAiming);
+                }
+                catch { return false; }
+            }
+        }
+
+        public int GetCurrentOpticZoom()
+        {
+            try
+            {
+                // This is a placeholder for getting the current optic zoom
+                // You would need to find the actual offset for the current optic zoom level
+                // For now, we can return a default value or try to find the offset
+                return 1;
+            }
+            catch { return 1; }
+        }
+
+        private void SetupBones()
+        {
+            var bonesToRegister = new[]
+            {
+                Bones.HumanHead,
+                Bones.HumanNeck,
+                Bones.HumanSpine3,
+                Bones.HumanSpine2,
+                Bones.HumanSpine1,
+                Bones.HumanPelvis,
+                Bones.HumanLUpperarm,
+                Bones.HumanLForearm1,
+                Bones.HumanLForearm2,
+                Bones.HumanLPalm,
+                Bones.HumanRUpperarm,
+                Bones.HumanRForearm1,
+                Bones.HumanRForearm2,
+                Bones.HumanRPalm,
+                Bones.HumanLThigh1,
+                Bones.HumanLThigh2,
+                Bones.HumanLCalf,
+                Bones.HumanLFoot,
+                Bones.HumanRThigh1,
+                Bones.HumanRThigh2,
+                Bones.HumanRCalf,
+                Bones.HumanRFoot
+            };
+
+            foreach (var bone in bonesToRegister)
+            {
+                try 
+                {
+                    var chain = _transformInternalChain.ToArray();
+                    chain[chain.Length - 2] = MonoList<byte>.ArrStartOffset + (uint)bone * 0x8;
+                    
+                    var ti = Memory.ReadPtrChain(this, false, chain);
+                    var transform = new UnityTransform(ti);
+                    PlayerBones.TryAdd(bone, transform);
+                }
+                catch { }
+            }
+            
+            if (PlayerBones.Count > 0)
+            {
+                 _verticesCount = PlayerBones.Values.Max(x => x.Count);
+                 _verticesCount = Math.Max(_verticesCount, SkeletonRoot.Count);
+            }
         }
 
         /// <summary>

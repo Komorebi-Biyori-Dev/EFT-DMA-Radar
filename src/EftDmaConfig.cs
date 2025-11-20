@@ -500,6 +500,12 @@ namespace LoneEftDmaRadar
         public int AimLineLength { get; set; } = 1500;
 
         /// <summary>
+        /// Camera Field of View (Vertical).
+        /// </summary>
+        [JsonPropertyName("fov")]
+        public float FOV { get; set; } = 50.0f;
+
+        /// <summary>
         /// Show Mines/Claymores in the Radar UI.
         /// </summary>
         [JsonPropertyName("showMines")]
@@ -540,6 +546,96 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("markSusPlayers")]
         public bool MarkSusPlayers { get; set; } = false;
+
+        /// <summary>
+        /// Show Player Skeletons in ESP.
+        /// </summary>
+        [JsonPropertyName("espPlayerSkeletons")]
+        public bool EspPlayerSkeletons { get; set; } = true;
+
+        /// <summary>
+        /// Show Player Boxes in ESP.
+        /// </summary>
+        [JsonPropertyName("espPlayerBoxes")]
+        public bool EspPlayerBoxes { get; set; } = true;
+        
+        /// <summary>
+        /// Show AI Skeletons in ESP.
+        /// </summary>
+        [JsonPropertyName("espAISkeletons")]
+        public bool EspAISkeletons { get; set; } = true;
+
+        /// <summary>
+        /// Show AI Boxes in ESP.
+        /// </summary>
+        [JsonPropertyName("espAIBoxes")]
+        public bool EspAIBoxes { get; set; } = true;
+
+        /// <summary>
+        /// Show Player Names in ESP.
+        /// </summary>
+        [JsonPropertyName("espPlayerNames")]
+        public bool EspPlayerNames { get; set; } = true;
+
+        /// <summary>
+        /// Show AI Names in ESP.
+        /// </summary>
+        [JsonPropertyName("espAINames")]
+        public bool EspAINames { get; set; } = true;
+
+        /// <summary>
+        /// Show ESP Overlay.
+        /// </summary>
+        [JsonPropertyName("showESP")]
+        public bool ShowESP { get; set; } = true;
+        
+        /// <summary>
+        /// Show Exfils on ESP.
+        /// </summary>
+        [JsonPropertyName("espExfils")]
+        public bool EspExfils { get; set; } = true;
+
+        /// <summary>
+        /// Show Loot on ESP.
+        /// </summary>
+        [JsonPropertyName("espLoot")]
+        public bool EspLoot { get; set; } = true;
+
+        /// <summary>
+        /// Show Loot Prices on ESP.
+        /// </summary>
+        [JsonPropertyName("espLootPrice")]
+        public bool EspLootPrice { get; set; } = true;
+
+        [JsonPropertyName("espLootConeEnabled")]
+        public bool EspLootConeEnabled { get; set; } = true;
+
+        [JsonPropertyName("espLootConeAngle")]
+        public float EspLootConeAngle { get; set; } = 15f;
+
+        /// <summary>
+        /// Show a crosshair overlay on ESP window.
+        /// </summary>
+        [JsonPropertyName("espCrosshair")]
+        public bool EspCrosshair { get; set; }
+
+        /// <summary>
+        /// Crosshair half-length in pixels.
+        /// </summary>
+        [JsonPropertyName("espCrosshairLength")]
+        public float EspCrosshairLength { get; set; } = 25f;
+
+        /// <summary>
+        /// Custom ESP Screen Width (0 = Auto).
+        /// </summary>
+        [JsonPropertyName("espScreenWidth")]
+        public int EspScreenWidth { get; set; } = 0;
+
+        /// <summary>
+        /// Custom ESP Screen Height (0 = Auto).
+        /// </summary>
+        [JsonPropertyName("espScreenHeight")]
+        public int EspScreenHeight { get; set; } = 0;
     }
 
     public sealed class LootConfig

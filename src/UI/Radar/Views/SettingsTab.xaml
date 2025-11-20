@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="LoneEftDmaRadar.UI.Radar.Views.SettingsTab"
+<UserControl x:Class="LoneEftDmaRadar.UI.Radar.Views.SettingsTab"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:LoneEftDmaRadar.UI.Radar.Views"

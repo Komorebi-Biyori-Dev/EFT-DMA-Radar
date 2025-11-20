@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -52,6 +52,7 @@ using LoneEftDmaRadar.UI.ColorPicker;
 using LoneEftDmaRadar.UI.Misc;
 using LoneEftDmaRadar.UI.Radar.Maps;
 using LoneEftDmaRadar.UI.Skia;
+using LoneEftDmaRadar.UI.ESP;
 using LoneEftDmaRadar.Web.EftApiTech;
 using LoneEftDmaRadar.Web.TarkovDev.Data;
 using LoneEftDmaRadar.Web.TarkovDev.Profiles;
@@ -123,7 +124,7 @@ namespace LoneEftDmaRadar
                 throw;
             }
         }
-
+        
         protected override async void OnStartup(StartupEventArgs e)
         {
             try
@@ -131,6 +132,7 @@ namespace LoneEftDmaRadar
                 base.OnStartup(e);
                 using var loading = new LoadingWindow();
                 await ConfigureProgramAsync(loadingWindow: loading);
+
                 MainWindow = new MainWindow();
                 MainWindow.Show();
             }
@@ -145,6 +147,7 @@ namespace LoneEftDmaRadar
         {
             try
             {
+                ESPManager.CloseESP();
                 Config.Save();
             }
             finally

@@ -172,6 +172,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
             var ti = Memory.ReadPtrChain(this, false, _transformInternalChain);
             SkeletonRoot = new UnityTransform(ti);
             _ = SkeletonRoot.UpdatePosition();
+            SetupBones();
 
             bool isAI = Memory.ReadValue<bool>(this + Offsets.ObservedPlayerView.IsAI);
             IsHuman = !isAI;
@@ -279,6 +280,55 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         {
             var movementController = Memory.ReadPtrChain(ObservedPlayerController, true, Offsets.ObservedPlayerController.MovementController, Offsets.ObservedMovementController.ObservedPlayerStateContext);
             return movementController;
+        }
+
+        private void SetupBones()
+        {
+            var bonesToRegister = new[]
+            {
+                Bones.HumanHead,
+                Bones.HumanNeck,
+                Bones.HumanSpine3,
+                Bones.HumanSpine2,
+                Bones.HumanSpine1,
+                Bones.HumanPelvis,
+                Bones.HumanLUpperarm,
+                Bones.HumanLForearm1,
+                Bones.HumanLForearm2,
+                Bones.HumanLPalm,
+                Bones.HumanRUpperarm,
+                Bones.HumanRForearm1,
+                Bones.HumanRForearm2,
+                Bones.HumanRPalm,
+                Bones.HumanLThigh1,
+                Bones.HumanLThigh2,
+                Bones.HumanLCalf,
+                Bones.HumanLFoot,
+                Bones.HumanRThigh1,
+                Bones.HumanRThigh2,
+                Bones.HumanRCalf,
+                Bones.HumanRFoot
+            };
+
+            foreach (var bone in bonesToRegister)
+            {
+                try 
+                {
+                    var chain = _transformInternalChain.ToArray();
+                    chain[chain.Length - 2] = MonoList<byte>.ArrStartOffset + (uint)bone * 0x8;
+                    
+                    var ti = Memory.ReadPtrChain(this, false, chain);
+                    var transform = new UnityTransform(ti);
+                    PlayerBones.TryAdd(bone, transform);
+                }
+                catch { }
+            }
+            
+            if (PlayerBones.Count > 0)
+            {
+                 _verticesCount = PlayerBones.Values.Max(x => x.Count);
+                 _verticesCount = Math.Max(_verticesCount, SkeletonRoot.Count);
+            }
         }
 
         /// <summary>

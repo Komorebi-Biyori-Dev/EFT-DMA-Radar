@@ -105,7 +105,27 @@ namespace LoneEftDmaRadar.Tarkov.Unity.Structures
                     {
                         try
                         {
-                            var localGameWorld = Memory.ReadPtrChain(currentObject.ThisObject, false, UnitySDK.UnityOffsets.GameWorldChain);
+                            // Try reading GameWorldChain
+                            ulong localGameWorld = 0x0;
+                            try
+                            {
+                                localGameWorld = Memory.ReadPtrChain(currentObject.ThisObject, false, UnitySDK.UnityOffsets.GameWorldChain);
+                            }
+                            catch
+                            {
+                                // Fallback or ignore if chain fails
+                            }
+
+                            if (localGameWorld == 0x0)
+                            {
+                                // If chain failed, maybe it's directly on the object or different structure in new version?
+                                // For now, let's assume the standard chain is correct but maybe the object name changed or we need to be more robust.
+                                // Let's try reading just the component at 0x10 first? 
+                                // actually UnitySDK.UnityOffsets.GameWorldChain is usually { 0x10, 0x30, 0x30 } or similar.
+                                // If we fail here, we just continue loop.
+                                throw new Exception("Failed to resolve LocalGameWorld from GameWorld object.");
+                            }
+
                             /// Get Selected Map
                             var mapPtr = Memory.ReadValue<ulong>(localGameWorld + Offsets.GameWorld.Location, false);
                             if (mapPtr == 0x0) // Offline Mode

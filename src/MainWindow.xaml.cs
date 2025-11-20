@@ -30,6 +30,7 @@ using LoneEftDmaRadar.UI.Radar.ViewModels;
 using LoneEftDmaRadar.UI.Skia;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Input;
+using LoneEftDmaRadar.UI.ESP;
 
 namespace LoneEftDmaRadar
 {
@@ -38,17 +39,6 @@ namespace LoneEftDmaRadar
     /// </summary>
     public sealed partial class MainWindow : Window
     {
-        /// <summary>
-        /// Global Singleton instance of the MainWindow.
-        /// </summary>
-        [MaybeNull]
-        public static MainWindow Instance { get; private set; }
-
-        /// <summary>
-        /// ViewModel for the MainWindow.
-        /// </summary>
-        public MainWindowViewModel ViewModel { get; }
-
         public MainWindow()
         {
             if (Instance is not null)
@@ -63,6 +53,28 @@ namespace LoneEftDmaRadar
             DataContext = ViewModel = new MainWindowViewModel(this);
             Instance = this;
         }
+
+        private void BtnToggleESP_Click(object sender, RoutedEventArgs e)
+        {
+            ESPManager.ToggleESP();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            ESPManager.CloseESP();
+            base.OnClosed(e);
+        }
+
+        /// <summary>
+        /// Global Singleton instance of the MainWindow.
+        /// </summary>
+        [MaybeNull]
+        public static MainWindow Instance { get; private set; }
+
+        /// <summary>
+        /// ViewModel for the MainWindow.
+        /// </summary>
+        public MainWindowViewModel ViewModel { get; }
 
         /// <summary>
         /// Make sure the program really closes.

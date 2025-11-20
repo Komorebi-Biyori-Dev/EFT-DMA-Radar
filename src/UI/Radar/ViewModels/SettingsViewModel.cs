@@ -181,6 +181,19 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
             }
         }
 
+        public float FOV
+        {
+            get => App.Config.UI.FOV;
+            set
+            {
+                if (App.Config.UI.FOV != value)
+                {
+                    App.Config.UI.FOV = value;
+                    OnPropertyChanged(nameof(FOV));
+                }
+            }
+        }
+
         public int MaxDistance
         {
             get => (int)Math.Round(App.Config.UI.MaxDistance);
@@ -387,6 +400,23 @@ namespace LoneEftDmaRadar.UI.Radar.ViewModels
                 {
                     App.Config.UI.MarkSusPlayers = value;
                     OnPropertyChanged(nameof(MarkSusPlayers));
+                }
+            }
+        }
+        
+        public bool ShowESP
+        {
+            get => UI.ESP.ESPWindow.ShowESP;
+            set
+            {
+                if (UI.ESP.ESPWindow.ShowESP != value)
+                {
+                    if (value)
+                        UI.ESP.ESPManager.ShowESP();
+                    else
+                        UI.ESP.ESPManager.HideESP();
+                    
+                    OnPropertyChanged(nameof(ShowESP));
                 }
             }
         }

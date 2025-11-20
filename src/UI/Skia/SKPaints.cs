@@ -455,6 +455,29 @@ namespace LoneEftDmaRadar.UI.Skia
             IsAntialias = true,
         };
 
+        public static SKPaint PaintExfilPending { get; } = new()
+        {
+            Color = SKColors.Yellow,
+            StrokeWidth = 0.25f,
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true,
+        };
+
+        public static SKPaint PaintExfilClosed { get; } = new()
+        {
+            Color = SKColors.Red.WithAlpha(128),
+            StrokeWidth = 0.25f,
+            Style = SKPaintStyle.Fill,
+            IsAntialias = true,
+        };
+
+        public static SKPaint TextExfil { get; } = new()
+        {
+            Color = SKColors.White,
+            IsStroke = false,
+            IsAntialias = true,
+        };
+
         public static SKPaint PaintExfilTransit { get; } = new()
         {
             Color = SKColors.Orange,
@@ -532,7 +555,7 @@ namespace LoneEftDmaRadar.UI.Skia
         public static SKPaint PaintAimviewWidgetCrosshair { get; } = new()
         {
             Color = SKColors.White,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke,
             IsAntialias = true
         };
@@ -540,70 +563,70 @@ namespace LoneEftDmaRadar.UI.Skia
         public static SKPaint PaintAimviewWidgetLocalPlayer { get; } = new()
         {
             Color = SKColors.Green,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetPMC { get; } = new()
         {
             Color = SKColors.Red,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetWatchlist { get; } = new()
         {
             Color = SKColors.HotPink,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetStreamer { get; } = new()
         {
             Color = SKColors.MediumPurple,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetTeammate { get; } = new()
         {
             Color = SKColors.LimeGreen,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetBoss { get; } = new()
         {
             Color = SKColors.Fuchsia,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetScav { get; } = new()
         {
             Color = SKColors.Yellow,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetRaider { get; } = new()
         {
             Color = SKColor.Parse("ffc70f"),
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetPScav { get; } = new()
         {
             Color = SKColors.White,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
         public static SKPaint PaintAimviewWidgetFocused { get; } = new()
         {
             Color = SKColors.Coral,
-            StrokeWidth = AimviewWidget.AimviewBaseStrokeSize,
+            StrokeWidth = 1,
             Style = SKPaintStyle.Stroke
         };
 
