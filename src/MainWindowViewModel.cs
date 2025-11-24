@@ -40,7 +40,7 @@ namespace LoneEftDmaRadar
         public MainWindowViewModel(MainWindow parent)
         {
             _parent = parent ?? throw new ArgumentNullException(nameof(parent));
-            LoadHotkeyManager();
+            EnsureHotkeysRegistered();
         }
 
         public void ToggleFullscreen(bool toFullscreen)
@@ -71,6 +71,16 @@ namespace LoneEftDmaRadar
         /// Loads Hotkey Manager resources.
         /// Only call from Primary Thread/Window (ONCE!)
         /// </summary>
+        private bool _hotkeysRegistered;
+
+        internal void EnsureHotkeysRegistered()
+        {
+            if (_hotkeysRegistered)
+                return;
+            LoadHotkeyManager();
+            _hotkeysRegistered = true;
+        }
+
         private void LoadHotkeyManager()
         {
             var zoomIn = new HotkeyActionController("Zoom In");
@@ -123,6 +133,12 @@ namespace LoneEftDmaRadar
             HotkeyAction.RegisterController(toggleESPExfils);
             HotkeyAction.RegisterController(engageAimbotDeviceAimbot);
             HotkeyAction.RegisterController(toggleDeviceAimbotEnabled);
+            HotkeyManagerViewModel.NotifyControllersRegistered();
+        }
+
+        internal static void EnsureHotkeysRegisteredStatic()
+        {
+            MainWindow.Instance?.ViewModel?.EnsureHotkeysRegistered();
         }
 
         private void ToggleAimviewWidget_HotkeyStateChanged(object sender, HotkeyEventArgs e)

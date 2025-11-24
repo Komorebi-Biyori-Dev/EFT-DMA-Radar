@@ -8,6 +8,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using LoneEftDmaRadar.Misc.Workers;
 using LoneEftDmaRadar.UI.Hotkeys;
 using LoneEftDmaRadar.UI.Misc;
@@ -100,9 +101,10 @@ namespace LoneEftDmaRadar.DMA
                 }
 
                 bool isDownDeviceAimbot = IsDeviceAimbotKeyDown(vk);
+                bool isDownMouseFallback = IsMouseVirtualKey(vk) && IsMouseAsyncDown(vk);
 
                 // FINAL state: key is considered down if EITHER backend reports it.
-                bool isKeyDown = isDownWin32 || isDownDeviceAimbot;
+                bool isKeyDown = isDownWin32 || isDownDeviceAimbot || isDownMouseFallback;
 
                 action.Execute(isKeyDown);
             }
@@ -158,6 +160,22 @@ namespace LoneEftDmaRadar.DMA
             }
 
             return Device.button_pressed(button);
+        }
+
+        private static bool IsMouseVirtualKey(Win32VirtualKey vk) =>
+            vk is Win32VirtualKey.LBUTTON 
+            or Win32VirtualKey.RBUTTON 
+            or Win32VirtualKey.MBUTTON
+            or Win32VirtualKey.XBUTTON1 
+            or Win32VirtualKey.XBUTTON2;
+
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int vKey);
+
+        private static bool IsMouseAsyncDown(Win32VirtualKey vk)
+        {
+            var state = GetAsyncKeyState((int)vk);
+            return (state & 0x8000) != 0;
         }
     }
 }

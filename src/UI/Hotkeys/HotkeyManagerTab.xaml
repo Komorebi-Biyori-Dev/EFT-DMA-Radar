@@ -5,55 +5,185 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="clr-namespace:LoneEftDmaRadar.UI.Hotkeys"
              mc:Ignorable="d"
-             Padding="10">
+             Padding="10"
+             PreviewKeyDown="OnPreviewKeyDown"
+             Focusable="True"
+             Background="#FF1E1E1E">
+    <UserControl.Resources>
+        <vm:BooleanToBrushConverter x:Key="BooleanToBrushConverter">
+            <vm:BooleanToBrushConverter.TrueBrush>
+                <SolidColorBrush Color="#0078D7" Opacity="0.3"/>
+            </vm:BooleanToBrushConverter.TrueBrush>
+            <vm:BooleanToBrushConverter.FalseBrush>
+                <SolidColorBrush Color="Transparent"/>
+            </vm:BooleanToBrushConverter.FalseBrush>
+        </vm:BooleanToBrushConverter>
+
+        <!-- Dark Theme Colors -->
+        <SolidColorBrush x:Key="BackgroundBrush" Color="#FF1E1E1E"/>
+        <SolidColorBrush x:Key="HoverBrush" Color="#FF2D2D30"/>
+        <SolidColorBrush x:Key="ListeningBrush" Color="#1A4D6F"/>
+        <SolidColorBrush x:Key="BorderBrush" Color="#3F3F46"/>
+        <SolidColorBrush x:Key="TextBrush" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="SubtleBrush" Color="#999999"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#0078D7"/>
+    </UserControl.Resources>
+
     <d:UserControl.DataContext>
         <d:DesignInstance Type="{x:Type vm:HotkeyManagerViewModel}"
                           IsDesignTimeCreatable="False" />
     </d:UserControl.DataContext>
+
     <Grid>
-        <GroupBox Header="Set Hotkeys In-Game" FontWeight="Bold">
-            <DockPanel LastChildFill="True" Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                <!-- Top row: Action + Key pickers and Add/Remove -->
-                <StackPanel DockPanel.Dock="Top"
-                    Orientation="Horizontal"
-                    Margin="0,0,0,12">
+        <!-- Header -->
+        <TextBlock Grid.Row="0"
+                   Margin="0,0,0,8"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource TextBrush}"
+                   Text="Keybind Manager" />
 
-                    <!-- Action -->
-                    <StackPanel Width="200">
-                        <TextBlock Text="Action" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding Controllers}" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  SelectedItem="{Binding SelectedAction}"
-                                  HorizontalAlignment="Stretch"/>
-                    </StackPanel>
-
-                    <!-- Hotkey -->
-                    <StackPanel Width="200" Margin="16,0,0,0">
-                        <TextBlock Text="Hotkey" Margin="0,0,0,4"/>
-                        <ComboBox ItemsSource="{Binding AvailableKeys}" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                  SelectedItem="{Binding SelectedKey}"
-                                  HorizontalAlignment="Stretch"/>
-                    </StackPanel>
-
-                    <!-- Add / Remove -->
-                    <StackPanel Margin="16,0,0,0" VerticalAlignment="Bottom">
-                        <Button Content="Add"
-                                Command="{Binding AddCommand}"
-                                MinWidth="75"
-                                Margin="0,0,0,6"/>
-                        <Button Content="Remove"
-                                Command="{Binding RemoveCommand}"
-                                MinWidth="75"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- Center: Hotkey list -->
-                <ListBox ItemsSource="{Binding HotkeyEntries}" SelectedItem="{Binding SelectedEntry}"
-                         DisplayMemberPath="."
-                         BorderThickness="1"
-                         BorderBrush="Gray"
-                         Padding="4"/>
-            </DockPanel>
+        <!-- Instructions -->
+        <GroupBox Grid.Row="1"
+                  Header="How to bind keys"
+                  Margin="0,0,0,12"
+                  Foreground="{StaticResource TextBrush}">
+            <TextBlock TextWrapping="Wrap"
+                       Margin="5"
+                       FontStyle="Italic"
+                       Foreground="{StaticResource SubtleBrush}">
+                Click on any action or key cell to start listening for input<LineBreak/>
+                Press any keyboard key or mouse button to bind it<LineBreak/>
+                Press <Bold>ESC</Bold> to cancel binding<LineBreak/>
+                Click <Bold>Clear</Bold> to unbind an action
+            </TextBlock>
         </GroupBox>
+
+        <!-- Column Headers -->
+        <Grid Grid.Row="2" Margin="0,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0"
+                       Text="Action"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextBrush}"
+                       Margin="8,0,0,0"/>
+            <TextBlock Grid.Column="1"
+                       Text="Keybind"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextBrush}"
+                       Margin="8,0,0,0"/>
+            <TextBlock Grid.Column="2"
+                       Text="Reset"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource TextBrush}"
+                       Margin="8,0,0,0"
+                       HorizontalAlignment="Center"/>
+        </Grid>
+
+        <!-- Bindings List -->
+        <ScrollViewer Grid.Row="3"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Bindings}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="0,0,0,1"
+                                Padding="0"
+                                Margin="0"
+                                MouseLeftButtonUp="OnBindingClick"
+                                Cursor="Hand">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsListening}" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource ListeningBrush}"/>
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource HoverBrush}"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+
+                            <Grid Margin="8,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="100"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Action Name -->
+                                <TextBlock Grid.Column="0"
+                                           Text="{Binding ActionName}"
+                                           Foreground="{StaticResource TextBrush}"
+                                           VerticalAlignment="Center"/>
+
+                                <!-- Key Display -->
+                                <Border Grid.Column="1"
+                                        Background="{Binding IsListening, Converter={StaticResource BooleanToBrushConverter}}"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        Padding="8,4"
+                                        Margin="0,0,8,0">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsListening}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}"/>
+                                                    <Setter Property="BorderThickness" Value="2"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding DisplayKey}"
+                                               Foreground="{StaticResource TextBrush}"
+                                               FontFamily="Consolas"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="{StaticResource TextBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsListening}" Value="True">
+                                                        <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+                                                        <Setter Property="FontWeight" Value="SemiBold"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding DisplayKey}" Value="Unbound">
+                                                        <Setter Property="Foreground" Value="{StaticResource SubtleBrush}"/>
+                                                        <Setter Property="FontStyle" Value="Italic"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Border>
+
+                                <!-- Clear Button -->
+                                <Button Grid.Column="2"
+                                        Content="Clear"
+                                        Click="OnClearBindingClick"
+                                        MinWidth="70"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>
