@@ -93,6 +93,8 @@ namespace LoneEftDmaRadar
             toggleShowMeds.HotkeyStateChanged += ToggleShowMeds_HotkeyStateChanged;
             var engageAimbotDeviceAimbot = new HotkeyActionController("Engage Aimbot");
             engageAimbotDeviceAimbot.HotkeyStateChanged += EngageAimbotDeviceAimbot_HotkeyStateChanged;
+            var toggleDeviceAimbotEnabled = new HotkeyActionController("Toggle Device Aimbot");
+            toggleDeviceAimbotEnabled.HotkeyStateChanged += ToggleDeviceAimbotEnabled_HotkeyStateChanged;
             
             var toggleESP = new HotkeyActionController("Toggle ESP Overlay");
             toggleESP.HotkeyStateChanged += ToggleESP_HotkeyStateChanged;
@@ -120,6 +122,7 @@ namespace LoneEftDmaRadar
             HotkeyAction.RegisterController(toggleESPLoot);
             HotkeyAction.RegisterController(toggleESPExfils);
             HotkeyAction.RegisterController(engageAimbotDeviceAimbot);
+            HotkeyAction.RegisterController(toggleDeviceAimbotEnabled);
         }
 
         private void ToggleAimviewWidget_HotkeyStateChanged(object sender, HotkeyEventArgs e)
@@ -141,6 +144,17 @@ namespace LoneEftDmaRadar
             if (_parent.DeviceAimbot?.ViewModel is DeviceAimbotViewModel DeviceAimbotAim)
             {
                 DeviceAimbotAim.IsEngaged = e.State;
+            }
+        }
+
+        private void ToggleDeviceAimbotEnabled_HotkeyStateChanged(object sender, HotkeyEventArgs e)
+        {
+            if (!e.State)
+                return;
+
+            if (_parent.DeviceAimbot?.ViewModel is DeviceAimbotViewModel vm)
+            {
+                vm.Enabled = !vm.Enabled;
             }
         }
 
