@@ -65,7 +65,8 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Camera
         public ulong OpticCamera { get; }
         private ulong _fpsMatrixAddress;
         private ulong _opticMatrixAddress;
-        private bool OpticCameraActive => Memory.ReadValue<bool>(OpticCamera + UnitySDK.UnityOffsets.MonoBehaviour_IsAddedOffset, false);
+        // Simply check if OpticCamera exists (is initialized)
+        private bool OpticCameraActive => OpticCamera != 0;
 
         public static void UpdateViewportRes()
         {
