@@ -146,7 +146,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Loot
             {
                 ct.ThrowIfCancellationRequested();
                 var hasExisting = _loot.TryGetValue(lootBase, out var existing);
-                if (hasExisting && existing is not LootItem && existing is not LootCorpse)
+                if (hasExisting && existing is not LootItem)
                 {
                     continue; // Already processed this non-updatable loot item once before
                 }
