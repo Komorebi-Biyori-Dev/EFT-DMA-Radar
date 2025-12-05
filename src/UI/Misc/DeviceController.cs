@@ -157,51 +157,74 @@ namespace LoneEftDmaRadar.UI.Misc
 
         private static bool ValidateMakcuSignature(int timeoutMs = 800)
         {
-            try
+            if (port == null || !port.IsOpen) return false;
+
+            // Prevent simultaneous access to the same port
+            lock (port)
             {
-                if (port == null || !port.IsOpen) return false;
-
-                // make sure we don't read stale bytes
-                port.DiscardInBuffer();
-
-                // Send probe
-                port.Write("km.version()\r");
-
-                // Temporarily set a read timeout for the probe
-                int oldTimeout = port.ReadTimeout;
-                port.ReadTimeout = timeoutMs;
-
-                string line = port.ReadLine()?.Trim();
-                port.ReadTimeout = oldTimeout;
-
-                DebugLogger.LogDebug($"[ValidateMakcu] Response: '{line}'");
-
-                if (string.IsNullOrEmpty(line))
+                try
                 {
-                    DebugLogger.LogDebug($"[ValidateMakcu] Empty response");
+                    // Clear the receive/transmit buffer
+                    port.DiscardInBuffer();
+                    port.DiscardOutBuffer();
+
+                    // Align with device line breaks
+                    string oldNewLine = port.NewLine;
+                    if (oldNewLine != "\r" && oldNewLine != "\r\n")
+                        port.NewLine = "\r";
+
+                    // Old Timeout Save
+                    int oldTimeout = port.ReadTimeout;
+                    // Each reading session is short, with overall deadline management
+                    port.ReadTimeout = Math.Min(200, Math.Max(50, timeoutMs / 4));
+
+                    // Probe transmission
+                    port.Write("km.version()\r");
+
+                    long deadline = Environment.TickCount64 + timeoutMs;
+                    bool ok = false;
+
+                    while (Environment.TickCount64 < deadline)
+                    {
+                        try
+                        {
+                            string line = port.ReadLine()?.Trim();
+                            DebugLogger.LogDebug($"[ValidateMakcu] Response(line): '{line}'");
+
+                            if (string.IsNullOrEmpty(line))
+                                continue;
+
+                            // Allow lines containing the expected signature (other characters may appear before or after it)
+                            if (line.IndexOf(Makcu_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase) >= 0)
+                            {
+                                version = line;
+                                DebugLogger.LogDebug("[ValidateMakcu] Signature VALID");
+                                ok = true;
+                                break;
+                            }
+
+                            // Skip obvious echoes or noise from other commands (km.xxx)
+                            if (line.StartsWith("km.", StringComparison.OrdinalIgnoreCase))
+                                continue;
+                        }
+                        catch (TimeoutException)
+                        {
+                        }
+                    }
+
+                    port.ReadTimeout = oldTimeout;
+                    port.NewLine = oldNewLine;
+
+                    if (!ok)
+                        DebugLogger.LogDebug($"[ValidateMakcu] Signature INVALID (expected '{Makcu_EXPECT_SIGNATURE}')");
+
+                    return ok;
+                }
+                catch (Exception ex)
+                {
+                    DebugLogger.LogDebug($"[ValidateMakcu] Exception: {ex.Message}");
                     return false;
                 }
-
-                // Accept starts-with or contains to be tolerant of echoes
-                bool ok = line.StartsWith(Makcu_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase)
-                       || line.Contains(Makcu_EXPECT_SIGNATURE, StringComparison.OrdinalIgnoreCase);
-
-                if (ok)
-                {
-                    version = line; // keep your cache in sync
-                    DebugLogger.LogDebug($"[ValidateMakcu] Signature VALID");
-                }
-                else
-                {
-                    DebugLogger.LogDebug($"[ValidateMakcu] Signature INVALID (expected '{Makcu_EXPECT_SIGNATURE}')");
-                }
-
-                return ok;
-            }
-            catch (Exception ex)
-            {
-                DebugLogger.LogDebug($"[ValidateMakcu] Exception: {ex.Message}");
-                return false;
             }
         }
 
